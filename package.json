@@ -1,0 +1,12 @@
+{
+  "name": "leads-ascend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {"vite": "8.2.2"},
+  "engines": {"node": ">=22.12.0"}
+}
