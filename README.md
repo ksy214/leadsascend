@@ -1,67 +1,93 @@
 # Leads Ascend
 
-A lightweight static marketing website for lead generation and custom AI integration services. Warm ivory, charcoal and orange; responsive navigation; native FAQs and a growth-brief dialog; motion that respects reduced-motion preferences.
+A lightweight static marketing website for a lead-generation service. Warm ivory and orange; a clear guarantee (**appointments booked, or you don't pay**); an animated lead → instant-reply → booked simulation; an interactive ROI calculator with animated results; a GoHighLevel booking section; mobile-friendly layouts; and motion that respects reduced-motion preferences.
+
+No frameworks ship to visitors. No external fonts, analytics, tracking, or animation libraries. The whole site is three small files plus a logo.
 
 ## Preview locally
 
-The website itself needs no framework or build step. Open `dist/index.html` in a browser, or use the optional Vite development server (Node 22.12+):
+The site needs no build step. Open `dist/index.html` in a browser, or use the optional Vite dev server (Node 22.12+):
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Use the local URL printed by Vite. Run `npm run check` to check navigation targets, local assets, script syntax, duplicate IDs and the static file size budget. Vite is only a development dependency; it is not shipped to visitors.
+Open the local URL Vite prints (usually http://localhost:5173/). Run `npm run check` to validate navigation targets, local assets, script syntax, duplicate IDs and the static file-size budget. Vite is a dev dependency only; it is not shipped to visitors.
 
 ## Files to edit
 
-- `dist/index.html`: text, navigation, offer and form markup
-- `dist/style.css`: colour palette, responsive layouts and animation
-- `dist/app.js`: brief creation, copy action and one-time section animations
-- `dist/assets/mark.svg`: vector logo and favicon
+- `dist/index.html` — text, navigation, the guarantee, sections and the booking area
+- `dist/style.css` — colour palette, responsive layouts and animation
+- `dist/app.js` — mobile nav, scroll reveals, the ROI calculator and the hero simulation
+- `dist/assets/mark.svg` — vector logo and favicon
+- `dist/CNAME` — the custom domain (`leadsascend.com`); leave as-is unless the domain changes
 
-No external fonts, analytics, animation frameworks, or tracking scripts are loaded by the production page. The system font stack renders immediately. Animation uses opacity/transform and a small IntersectionObserver; there are no continuous animation loops or scroll listeners. All content stays visible with JavaScript disabled, although the brief builder requires JavaScript.
+All content stays visible with JavaScript disabled. Animation uses opacity/transform and small IntersectionObservers; there are no scroll listeners.
 
-## Add this project to GitHub
+## Connect the booking calendar (GoHighLevel)
 
-The download excludes Git history, credentials and the private Sites identity. Unzip it into a folder named `leads-ascend`.
+The booking area (`#book` in `dist/index.html`) shows a placeholder until you paste your GoHighLevel (GHL) calendar embed:
 
-### GitHub Desktop
+1. In **GHL**, go to **Calendars**, open your calendar, and from the **"..." menu** choose **Embed Code** (or, from a Sites/Funnels calendar element, **Copy embed code**).
+2. GHL gives you an `<iframe …>` plus a `<script … form_embed.js>` line.
+3. In `dist/index.html`, find the `<div class="book-embed" id="book-embed">` block and **replace the entire div** with GHL's `<iframe>`. Keep GHL's `<script>` line right after the iframe — it auto-resizes the widget so there's no inner scrollbar. Add `style="width:100%;min-height:700px;border:0"` to the iframe so it fills the panel. A typical result:
 
-1. Install GitHub Desktop and sign in.
-2. Choose **File → Add Local Repository** and select the extracted folder. If prompted, choose **Create a Repository** there.
-3. Commit the project files and choose **Publish repository**. Keep it private unless you intend to share the source publicly.
+   ```html
+   <iframe src="https://api.leadconnectorhq.com/widget/booking/XXXXXXXX"
+           class="book-embed" style="width:100%;min-height:700px;border:0"
+           scrolling="no" id="XXXXXXXX"></iframe>
+   <script src="https://link.msgsndr.com/js/form_embed.js"></script>
+   ```
 
-### Command line
+4. Save, run `npm run check`, then commit and push (see below).
 
-Create an empty GitHub repository named `leads-ascend`. Do not initialise it with another README or .gitignore. In the extracted project folder:
+Prefer a plain link instead of an embed? Delete the `.book-embed` div and set the `href` on the **Book a call** buttons to your GHL scheduling link.
+
+The embed loads GHL's script from `link.msgsndr.com` and the widget from `api.leadconnectorhq.com`. GitHub Pages adds no Content-Security-Policy, so both load normally on the live site.
+
+## Deploy: edit, push, done
+
+Hosting is **GitHub Pages** via GitHub Actions (`.github/workflows/deploy.yml`). Every push to `main` publishes the `dist/` folder to the live site automatically.
+
+One-time setup:
+
+1. In the repo on GitHub: **Settings ▸ Pages ▸ Build and deployment ▸ Source → GitHub Actions**.
+2. Point the domain's DNS at GitHub Pages (see below).
+3. Push to `main`. The **Deploy website to GitHub Pages** workflow runs; when it's green, the site is live.
+
+Everyday edits:
 
 ```sh
-git init -b main
-git add .
-git commit -m "Add Leads Ascend website"
-git remote add origin https://github.com/YOUR-USERNAME/leads-ascend.git
-git push -u origin main
+# edit files in dist/ …
+npm run check          # optional but recommended
+git add -A
+git commit -m "Update copy"
+git push               # auto-deploys in ~1 minute
 ```
 
-Replace YOUR-USERNAME with your GitHub username. Authenticate through GitHub's normal sign-in process; never put tokens in project files.
+### DNS for leadsascend.com (GoDaddy)
 
-GitHub source control and website hosting are separate. Uploading code does not replace the existing Sites website. For optional GitHub Pages hosting, configure a GitHub Actions workflow to publish the `dist` folder. Do not publish the entire repository as website content. Custom-domain DNS setup is a separate step.
+In GoDaddy ▸ **Domain ▸ DNS ▸ Manage DNS**, set:
 
-Official guidance:
-- https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github
+| Type  | Name | Value                | Notes                    |
+|-------|------|----------------------|--------------------------|
+| A     | @    | 185.199.108.153      | GitHub Pages apex        |
+| A     | @    | 185.199.109.153      | GitHub Pages apex        |
+| A     | @    | 185.199.110.153      | GitHub Pages apex        |
+| A     | @    | 185.199.111.153      | GitHub Pages apex        |
+| CNAME | www  | ksy214.github.io.    | www → your Pages site    |
+
+Remove any conflicting "parked"/forwarding A or CNAME records GoDaddy added for `@`/`www`. After DNS propagates, enable **Enforce HTTPS** in Settings ▸ Pages. HTTPS certificates are issued automatically and can take up to a few hours the first time.
+
+Official references:
 - https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
+- https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site
 
 ## Before collecting real enquiries
 
-The current form generates and copies a brief locally. It does not send submissions, book appointments or store visitor information. Connect your booking calendar or a server-side form handler and supply the appropriate privacy information before launching lead capture. Do not place API keys in client-side JavaScript.
-
-The five-lead pilot does not yet promise free leads, a fixed price or a delivery deadline. Confirm service fees, ad spend, qualification criteria and timing before making that offer public. Custom AI integrations are advertised services; this marketing website does not itself implement a CRM or AI backend.
-
-## Hosting in Sites
-
-The canonical Sites checkout also contains `.openai/hosting.json`. Keep that file and its Site identity when continuing work in Sites. It is intentionally excluded from the portable GitHub download. Hosted files are the existing `dist` directory; no production build is required.
+The booking placeholder does not book anything until you paste your GoHighLevel calendar embed (above). Keep advertising-spend, pricing and the guarantee terms accurate and agreed before making the offer public. Never place API keys or tokens in client-side JavaScript or in project files.
 
 ## Logo exports
 
-The `brand` folder contains a transparent 4000px wordmark, a 2048px icon, outlined SVGs and favicon files. The `leadsascend.` lettering in the SVG uses paths and needs no installed font. To regenerate exports on a Linux environment with DejaVu Sans installed, install Python packages `fonttools`, `Pillow` and `cairosvg`, then run `python scripts/export-brand.py`.
+The `brand` folder contains a transparent 4000px wordmark, a 2048px icon, outlined SVGs and favicon files. The `leadsascend.` lettering uses paths and needs no installed font. To regenerate exports on Linux with DejaVu Sans installed, install Python packages `fonttools`, `Pillow` and `cairosvg`, then run `python scripts/export-brand.py`.

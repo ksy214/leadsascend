@@ -1,96 +1,10 @@
 'use strict';
 
-const modal = document.querySelector('#brief-dialog');
-const form = document.querySelector('#brief-form');
-const result = document.querySelector('#brief-result');
-const industryInput = document.querySelector('#industry');
-const serviceInput = document.querySelector('#service');
-const goalInput = document.querySelector('#goal');
-const briefText = document.querySelector('#brief-text');
-const copyStatus = document.querySelector('#copy-status');
-const copyButton = document.querySelector('#copy-brief');
-const initialCopyStatus = copyStatus.textContent;
-let opener;
-let briefRevision = 0;
+/* Leads Ascend — no runtime libraries. Content stays fully visible with JS disabled. */
 
-// Each CTA starts with its own context, preserving only the visitor's written goal.
-document.querySelectorAll('[data-open]').forEach((button) => {
-  button.addEventListener('click', () => {
-    opener = button;
-    briefRevision += 1;
-    form.hidden = false;
-    result.hidden = true;
-    industryInput.value = button.dataset.industry || 'Other service business';
-    serviceInput.value = button.dataset.service || 'More enquiries';
-    goalInput.setCustomValidity('');
-    copyStatus.textContent = initialCopyStatus;
-    copyButton.disabled = false;
-    document.querySelector('.mobile-nav')?.removeAttribute('open');
-    modal.showModal();
-    document.body.classList.add('dialog-open');
-  });
-});
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-document.querySelector('.close').addEventListener('click', () => modal.close());
-modal.addEventListener('click', (event) => {
-  if (event.target !== modal) return;
-  const bounds = modal.getBoundingClientRect();
-  if (event.clientX < bounds.left || event.clientX > bounds.right ||
-      event.clientY < bounds.top || event.clientY > bounds.bottom) modal.close();
-});
-modal.addEventListener('close', () => {
-  briefRevision += 1;
-  document.body.classList.remove('dialog-open');
-  opener?.focus();
-});
-
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const goal = goalInput.value.trim();
-  if (!goal) {
-    goalInput.setCustomValidity('Please describe your goal.');
-    goalInput.reportValidity();
-    return;
-  }
-  const service = serviceInput.value;
-  const next = service === '5-lead pilot'
-    ? 'Agree what counts as a relevant enquiry, then confirm pilot pricing, advertising budget and timing before launching a campaign around your first five leads.'
-    : service === 'Custom AI integration'
-      ? 'Start by mapping one repetitive workflow, the tools involved and where a person should take over.'
-      : 'Start by reviewing your ideal customer, current enquiry journey and the opportunities you want to create.';
-  briefText.value = `Leads Ascend — Growth brief\n\nIndustry: ${industryInput.value}\nFocus: ${service}\nMy goal: ${goal}\n\nSuggested starting point: ${next}`;
-  briefRevision += 1;
-  copyStatus.textContent = initialCopyStatus;
-  form.hidden = true;
-  result.hidden = false;
-  copyButton.focus();
-});
-goalInput.addEventListener('input', () => goalInput.setCustomValidity(''));
-document.querySelector('#edit-brief').addEventListener('click', () => {
-  briefRevision += 1;
-  form.hidden = false;
-  result.hidden = true;
-  industryInput.focus();
-});
-copyButton.addEventListener('click', async () => {
-  const revision = briefRevision;
-  copyButton.disabled = true;
-  try {
-    await navigator.clipboard.writeText(briefText.value);
-    if (revision === briefRevision && modal.open) {
-      copyStatus.textContent = 'Brief copied. Nothing has been sent — keep it for your conversation with Leads Ascend.';
-    }
-  } catch {
-    if (revision === briefRevision && modal.open) {
-      briefText.focus();
-      briefText.select();
-      copyStatus.textContent = 'Automatic copying is unavailable. Select and copy the brief above to keep it.';
-    }
-  } finally {
-    copyButton.disabled = false;
-  }
-});
-
+/* ---------- Mobile navigation ---------- */
 const mobileMenu = document.querySelector('.mobile-nav');
 mobileMenu?.querySelectorAll('a').forEach((link) => {
   link.addEventListener('click', () => mobileMenu.removeAttribute('open'));
@@ -98,29 +12,150 @@ mobileMenu?.querySelectorAll('a').forEach((link) => {
 mobileMenu?.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     mobileMenu.removeAttribute('open');
-    mobileMenu.querySelector('summary').focus();
+    mobileMenu.querySelector('summary')?.focus();
   }
 });
 
-// Animate only when a section enters view. Content stays visible if JS is unavailable.
-const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-const revealTargets = document.querySelectorAll('.section-head, .service, .ai-feature, .industry-card, .process article, .about, .faq-section, .cta, .pilot');
-let revealObserver;
-function configureMotion() {
-  revealObserver?.disconnect();
-  if (motionPreference.matches) {
-    revealTargets.forEach((element) => element.classList.remove('reveal-enter'));
-    return;
-  }
-  if (!('IntersectionObserver' in window)) return;
-  revealObserver = new IntersectionObserver((entries) => {
+/* ---------- Scroll-reveal (only when a block enters view) ---------- */
+const revealTargets = document.querySelectorAll(
+  '.section-head, .service, .process article, .guarantee, .book, .faqs details, .cta, .stat'
+);
+if (!reduceMotion.matches && 'IntersectionObserver' in window) {
+  const revealObserver = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
       entry.target.classList.add('reveal-enter');
       revealObserver.unobserve(entry.target);
     }
-  }, { threshold: 0.08 });
-  revealTargets.forEach((element) => revealObserver.observe(element));
+  }, { threshold: 0.12 });
+  revealTargets.forEach((el) => revealObserver.observe(el));
 }
-configureMotion();
-motionPreference.addEventListener?.('change', configureMotion);
+
+/* ---------- ROI calculator (animated results) ---------- */
+const roiSection = document.querySelector('.roi-section');
+const apptsEl = document.querySelector('#roi-appts');
+const valueEl = document.querySelector('#roi-value');
+const closeEl = document.querySelector('#roi-close');
+
+if (roiSection && apptsEl && valueEl && closeEl) {
+  const outAppts = document.querySelector('[data-roi-out="appts"]');
+  const outValue = document.querySelector('[data-roi-out="value"]');
+  const outClose = document.querySelector('[data-roi-out="close"]');
+  const basisEl = document.querySelector('[data-roi-basis] b');
+  const monthlyEl = document.querySelector('#roi-monthly');
+  const annualEl = document.querySelector('#roi-annual');
+
+  const fmt = (n) => Math.round(n).toLocaleString('en-GB');
+
+  // Tween one number element from its last value to a target.
+  function tweenTo(el, target) {
+    const from = Number(el.dataset.val || 0);
+    el.dataset.val = target;
+    if (reduceMotion.matches) { el.textContent = fmt(target); return; }
+    cancelAnimationFrame(Number(el.dataset.raf || 0));
+    const start = performance.now();
+    const duration = 450;
+    const step = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(from + (target - from) * eased);
+      if (p < 1) el.dataset.raf = requestAnimationFrame(step);
+    };
+    el.dataset.raf = requestAnimationFrame(step);
+  }
+
+  function update() {
+    const appts = +apptsEl.value;
+    const value = +valueEl.value;
+    const close = +closeEl.value;
+    outAppts.textContent = appts;
+    outValue.textContent = value.toLocaleString('en-GB');
+    outClose.textContent = close;
+
+    const newCustomers = appts * (close / 100);
+    const monthly = newCustomers * value;
+    basisEl.textContent = newCustomers % 1 === 0
+      ? newCustomers.toLocaleString('en-GB')
+      : newCustomers.toFixed(1);
+    tweenTo(monthlyEl, monthly);
+    tweenTo(annualEl, monthly * 12);
+  }
+
+  [apptsEl, valueEl, closeEl].forEach((el) => el.addEventListener('input', update));
+
+  // Populate on first view so the results count up from zero.
+  if ('IntersectionObserver' in window && !reduceMotion.matches) {
+    const roiObserver = new IntersectionObserver((entries, obs) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        update();
+        obs.disconnect();
+      }
+    }, { threshold: 0.35 });
+    roiObserver.observe(roiSection);
+  } else {
+    update();
+  }
+}
+
+/* ---------- Hero simulation: lead → instant reply → booked ---------- */
+const simSteps = [...document.querySelectorAll('[data-sim-step]')];
+const simTimer = document.querySelector('[data-sim-timer]');
+
+if (simSteps.length === 3 && simTimer) {
+  if (reduceMotion.matches) {
+    // Static, fully visible: show the finished state and a representative reply time.
+    simSteps.forEach((step) => step.classList.add('active'));
+    simTimer.textContent = '0.9s';
+  } else {
+    let rafId = 0;
+    const timeouts = [];
+    const clearCycle = () => {
+      cancelAnimationFrame(rafId);
+      timeouts.forEach(clearTimeout);
+      timeouts.length = 0;
+    };
+
+    const runCycle = () => {
+      clearCycle();
+      simSteps.forEach((step) => step.classList.remove('active', 'typing'));
+      simTimer.textContent = '0.0s';
+
+      const started = performance.now();
+      let timerFrozen = false;
+      const tickTimer = (now) => {
+        if (timerFrozen) return;
+        simTimer.textContent = ((now - started) / 1000).toFixed(1) + 's';
+        rafId = requestAnimationFrame(tickTimer);
+      };
+      rafId = requestAnimationFrame(tickTimer);
+
+      // 1) Enquiry arrives
+      timeouts.push(setTimeout(() => simSteps[0].classList.add('active'), 250));
+      // 2) AI replies in under a second — freeze the timer to show the response time
+      timeouts.push(setTimeout(() => {
+        simSteps[1].classList.add('active', 'typing');
+        timerFrozen = true;
+        cancelAnimationFrame(rafId);
+      }, 950));
+      // 3) Appointment booked
+      timeouts.push(setTimeout(() => simSteps[2].classList.add('active'), 2100));
+      // Hold on the finished state, then loop
+      timeouts.push(setTimeout(runCycle, 4800));
+    };
+
+    // Only animate while the simulation is on screen.
+    if ('IntersectionObserver' in window) {
+      const simEl = simSteps[0].closest('.sim');
+      const simObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) runCycle();
+          else clearCycle();
+        }
+      }, { threshold: 0.25 });
+      simObserver.observe(simEl);
+    } else {
+      runCycle();
+    }
+  }
+}
