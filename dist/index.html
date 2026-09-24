@@ -202,34 +202,15 @@
           </ul>
         </div>
 
-        <!--
-          ┌─────────────────────────────────────────────────────────────────────────┐
-          │ GO HIGH LEVEL (GHL) CALENDAR — how to make this live (one-time setup):    │
-          │                                                                           │
-          │ 1. In GHL: Calendars ▸ open your calendar ▸ the "..." menu ▸ Embed Code.  │
-          │    (Or Sites/Funnels ▸ the calendar element ▸ "Copy embed code".)         │
-          │ 2. GHL gives you an <iframe ...> plus a <script ...form_embed.js> line.    │
-          │ 3. Replace the ENTIRE .book-embed <div> below with GHL's <iframe>, and    │
-          │    keep GHL's <script> line right after it (the script auto-resizes the    │
-          │    iframe so there's no scrollbar). Example shape:                         │
-          │                                                                           │
-          │    <iframe src="https://api.leadconnectorhq.com/widget/booking/XXXXXXXX"  │
-          │            class="book-embed" style="width:100%;min-height:700px;border:0"│
-          │            scrolling="no" id="XXXXXXXX"></iframe>                          │
-          │    <script src="https://link.msgsndr.com/js/form_embed.js"></script>      │
-          │                                                                           │
-          │ Prefer a link instead of an embed? Delete the .book-embed div and set the │
-          │ href on the "Book a call" buttons to your GHL scheduling link.            │
-          └─────────────────────────────────────────────────────────────────────────┘
-        -->
+        <!-- GoHighLevel booking widget. To swap calendars later, replace the iframe's
+             src and id with a new GHL embed and keep the form_embed.js script below
+             (it auto-resizes the iframe so there's no inner scrollbar). -->
         <div class="book-embed" id="book-embed">
-          <div class="book-embed-inner">
-            <img src="assets/mark.svg" alt="" width="34" height="34">
-            <strong>Your booking calendar loads here</strong>
-            <span>Paste your GoHighLevel calendar embed here (see the setup notes above) and this becomes a live booking widget.</span>
-            <a class="button" href="#book">Book a call ↗</a>
-          </div>
+          <iframe src="https://go.leadsascend.com/widget/booking/OmV3Gp4YwHWUMhUmHBwd"
+                  title="Book a call with Leads Ascend" allow="payment"
+                  scrolling="no" id="OmV3Gp4YwHWUMhUmHBwd_1790208171975"></iframe>
         </div>
+        <script src="https://go.leadsascend.com/js/form_embed.js" type="text/javascript"></script>
       </div>
     </section>
 
