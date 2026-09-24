@@ -16,27 +16,6 @@ mobileMenu?.addEventListener('keydown', (event) => {
   }
 });
 
-/* ---------- Booking popup (GHL calendar in a modal) ---------- */
-const bookDialog = document.querySelector('#book-dialog');
-if (bookDialog) {
-  const bookIframe = bookDialog.querySelector('iframe');
-  const openBooking = (event) => {
-    // No native <dialog> support → let the link open the GHL booking page instead.
-    if (typeof bookDialog.showModal !== 'function') return;
-    event.preventDefault();
-    if (bookIframe && !bookIframe.src && bookIframe.dataset.src) {
-      bookIframe.src = bookIframe.dataset.src; // load the calendar on first open
-    }
-    document.querySelector('.mobile-nav')?.removeAttribute('open');
-    bookDialog.showModal();
-    document.body.style.overflow = 'hidden';
-  };
-  document.querySelectorAll('[data-book]').forEach((el) => el.addEventListener('click', openBooking));
-  bookDialog.querySelector('.book-close')?.addEventListener('click', () => bookDialog.close());
-  bookDialog.addEventListener('click', (event) => { if (event.target === bookDialog) bookDialog.close(); });
-  bookDialog.addEventListener('close', () => { document.body.style.overflow = ''; });
-}
-
 /* ---------- Scroll-reveal (only when a block enters view) ---------- */
 const revealTargets = document.querySelectorAll(
   '.section-head, .service, .process article, .guarantee, .book, .faqs details, .cta, .stat'
