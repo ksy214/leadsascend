@@ -153,7 +153,7 @@ input[type=range]:focus-visible{outline:3px solid #cf7600;outline-offset:6px}
 .book-embed{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 25px 60px -45px #8f7246}
 /* Cap the GHL widget height (max-height overrides its inline auto-grow) so the
    time-selection step scrolls inside the box instead of stretching the page. */
-.book-embed iframe{display:block;width:100%;height:520px;min-height:0;max-height:520px;border:0}
+.book-embed iframe{display:block;width:100%;height:380px;min-height:0;max-height:380px;border:0}
 
 /* FAQ */
 .faq-section{display:grid;grid-template-columns:1fr 1.1fr;gap:60px}
@@ -231,7 +231,7 @@ footer{padding-top:50px;padding-bottom:26px}
   .process{gap:26px}
   .book-section{padding-block:52px}
   .book{grid-template-columns:1fr;gap:30px}
-  .book-embed iframe{height:520px;min-height:0;max-height:520px}
+  .book-embed iframe{height:380px;min-height:0;max-height:380px}
   .faq-section{grid-template-columns:1fr;gap:28px}
   .cta{padding:44px 22px}
   .footer-top{gap:16px}
